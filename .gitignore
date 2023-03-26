@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Network device configuration
+configurations/
+
+# Temporary files
+temp.py
+*.yml
