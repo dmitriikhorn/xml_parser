@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any
+from pydantic import BaseModel
 
 
 @dataclass
@@ -14,7 +15,7 @@ class FilterElement:
     regexp: str = '.*'
     filter_path: str = None
     indexed_query: str = ""
-    value: Any = None
+    unindexed_path: str = ""
 
 
 @dataclass
@@ -24,3 +25,8 @@ class PathElement:
     sibling_id: int = None
     filters: list[FilterElement] = field(default_factory=list)
     indexed_path: str = ''
+
+
+class ResultItem(BaseModel):
+    path_attribute: str = ''
+    value: Any = None
