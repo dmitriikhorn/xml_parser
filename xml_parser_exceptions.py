@@ -12,5 +12,6 @@ class IncorrectXmlParserApiRequest(Exception):
     Exception for handling incorrect API request to XML parser:
     - Empty query request
     - Empty list of nodes
+    - Wrong attributes in the input request
     """
     pass

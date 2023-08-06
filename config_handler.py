@@ -36,7 +36,7 @@ class XMLRoot:
 class XpathConstructor:
 
     def __init__(self, input_path: list):
-        self.input_path = input_path
+        self.input_path: list[dict] = input_path
 
     @staticmethod
     def parse_filters(raw_filter_list: list | None) -> list[dc.FilterElement]:
@@ -45,15 +45,9 @@ class XpathConstructor:
         :param raw_filter_list:
         :return: List of FilterElement objects
         """
-        parsed_filters: list = []
         if not raw_filter_list:
-            return parsed_filters
-        for raw_filter in raw_filter_list:
-            raw_filter: dict
-            filter_elem = dc.FilterElement()
-            filter_elem.filter_path = raw_filter.get("filter_path")
-            filter_elem.regexp = raw_filter.get("regexp")
-            parsed_filters.append(filter_elem)
+            return list()
+        parsed_filters: list[dc.FilterElement] = [dc.FilterElement(**raw_filter) for raw_filter in raw_filter_list]
         return parsed_filters
 
     def convert_xpath_to_dataclass(self) -> list[dc.PathElement]:
@@ -63,10 +57,10 @@ class XpathConstructor:
         """
         parsed_elements: list = []
         for elem in self.input_path:
-            elem: dict
-            path_elem = dc.PathElement()
-            path_elem.name = elem.get("name")
-            path_elem.filters = self.parse_filters(elem.get("filters"))
+            path_elem = dc.PathElement(
+                name=elem.get("name"),
+                filters=self.parse_filters(elem.get("filters"))
+            )
             parsed_elements.append(path_elem)
         return parsed_elements
 
@@ -97,7 +91,7 @@ class ConfigHandler:
         :param x_path: XPATH string representation
         :return: Updated XPATH
         """
-        splitted_path: list = [self.namespace_prefix + path for path in x_path.split("/")]
+        splitted_path: list = [self.namespace_prefix + path for path in x_path.strip("/").split("/")]
         return "/".join(splitted_path)
 
     def convert_xpath_to_string(self, parsed_xpath: list[dc.PathElement]) -> str:
@@ -115,7 +109,9 @@ class ConfigHandler:
                 xpath += f'[{elem.sibling_id}]'
             else:
                 for filter_id in elem.filters:
-                    xpath += f'[re:match({self.prepend_namespace(filter_id.filter_path)}, "{filter_id.regexp}")]'
+                    filter_path: str = self.prepend_namespace(filter_id.filter_path) if filter_id.is_a_path \
+                        else filter_id.filter_path
+                    xpath += f'[re:match({filter_path}, "{filter_id.regexp}")]'
             xpath += "/" if idx != last_item_id else ""
         return xpath
 
@@ -159,8 +155,8 @@ class ConfigHandler:
             idx_root_path += f"{path_element.name}[{path_element.sibling_id}]/"
             if path_element.filters:
                 for fltr in path_element.filters:
-                    fltr.indexed_query = idx_root_path + fltr.filter_path
-                    fltr.unindexed_path = root_path + fltr.filter_path
+                    fltr.indexed_query = idx_root_path + fltr.filter_path if fltr.is_a_path else idx_root_path
+                    fltr.unindexed_path = root_path + fltr.filter_path if fltr.is_a_path else root_path
                     elements_with_filters.append(fltr)
         return elements_with_filters
 
