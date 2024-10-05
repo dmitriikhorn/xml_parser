@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Optional
 import pydantic
-from pydantic import BaseModel,root_validator, validator
+from pydantic import BaseModel, root_validator, validator
 from xml_parser_exceptions import IncorrectXmlParserApiRequest
 
 

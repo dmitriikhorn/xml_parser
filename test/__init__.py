@@ -1,0 +1,1 @@
+#workaround for runing pytest from the ROOT dir

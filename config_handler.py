@@ -1,5 +1,8 @@
 import copy
+import sys
 from pathlib import Path
+from venv import logger
+
 import lxml.etree as ET
 from lxml.etree import _Element, XMLSyntaxError, _ElementTree
 from xml_parser_helpers import xml_audit_logger
@@ -52,7 +55,7 @@ class XpathConstructor:
 
     def convert_xpath_to_dataclass(self) -> list[dc.PathElement]:
         """
-        Convert xpath-request coming from YANG model (DB?)-format to custom dataclass
+        Convert xpath-request coming from API-request to custom dataclass
         :return: List of custom dataclass objects PathElement (representing xpath-request)
         """
         parsed_elements: list = []
@@ -75,12 +78,12 @@ class ConfigHandler:
 
     def get_namespace_mapping(self) -> dict:
         """
-        Get namespaces from XML header
-        Add REGEX to the NS
+        Get namespaces from XML header, add REGEX to the NS
         :return: Namespace mapping as dictionary
         """
         ns_map: dict = self.xml_root.getroot().nsmap
         ns_map["re"] = "http://exslt.org/regular-expressions"
+        # Currently Nokia uses xmlns="urn:nokia.com:sros:ns:yang:sr:conf" in the XML header => which lxml parses as None
         if None in ns_map:
             ns_map["ns"] = ns_map.pop(None)
         return ns_map
@@ -91,7 +94,7 @@ class ConfigHandler:
         :param x_path: XPATH string representation
         :return: Updated XPATH
         """
-        splitted_path: list = [self.namespace_prefix + path for path in x_path.strip("/").split("/")]
+        splitted_path: list[str] = [self.namespace_prefix + path for path in x_path.strip("/").split("/")]
         return "/".join(splitted_path)
 
     def convert_xpath_to_string(self, parsed_xpath: list[dc.PathElement]) -> str:
@@ -211,5 +214,13 @@ if __name__ == "__main__":
     r2_cfg: Path = Path("configurations/r2.xml")
     if test_xml_root := XMLRoot(r2_cfg).get_xml_root():
         test_cfg = ConfigHandler(test_xml_root)
+
+        tets = test_cfg.prepend_namespace("system[1]/security[1]/aaa[1]/local-profiles[2]/profile[5]/entry[30]/entry-id[110]/")
+
+        #system/security/aaa/local-profiles/profile/entry/entry-id
+        #system/security/aaa/local-profiles/profile/entry/entry-id/
+        #system[1]/security[1]/aaa[1]/local-profiles[2]/profile[5]/entry[30]/entry-id[110]/ ==> 'ns:system[1]/ns:security[1]/ns:aaa[1]/ns:local-profiles[2]/ns:profile[5]/ns:entry[30]/ns:entry-id[110]'
+        #'ns:system/ns:security/ns:aaa/ns:local-profiles/ns:profile/ns:entry/ns:entry-id'
+
         resp = test_cfg.process_query_pipeline(converted_path)
         print("debug")
