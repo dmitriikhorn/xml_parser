@@ -18,7 +18,7 @@ def run_query_to_device(xml_query: list, device_name: str) -> list[list[dc.Resul
     :param device_name: Hostname of a device
     :return: Response to the query as a list of ResultItem dataclasses
     """
-    device_cfg_location: Path = Path(f"configurations/{device_name}.xml")
+    device_cfg_location: Path = Path(f"configurations/{device_name}")
     adopted_x_path: list[dc.PathElement] = XpathConstructor(xml_query).convert_xpath_to_dataclass()
     xml_root: _ElementTree = XMLRoot(device_cfg_location).get_xml_root()
     parsed_configuration = ConfigHandler(xml_root)
@@ -28,18 +28,20 @@ def run_query_to_device(xml_query: list, device_name: str) -> list[list[dc.Resul
 @xml_parser_app.post("/xml_parser/")
 def run_query_route(query_data: dict):
     items = dict()
-    xml_query: list = query_data.get("query")
+    xpath: list = query_data.get("xpath")
     device_list: list = query_data.get("device_list")
 
-    if not xml_query:
+    if not xpath:
         raise HTTPException(status_code=404, detail=f'Input XML query is absent')
     if not device_list:
         raise HTTPException(status_code=404, detail=f'Input list of devices is empty')
 
     for device_name in device_list:
         try:
-            items[device_name] = run_query_to_device(xml_query, device_name)
+            items[device_name] = run_query_to_device(xpath, device_name)
         except XmlConfigurationLoadError:
             raise HTTPException(status_code=404, detail=f'Configuration of the device "{device_name}" is corrupt or '
                                                         f'could not be found')
+    if not any(items.values()):
+        raise HTTPException(status_code=404, detail=f'Nothing is found in the selected configurations to the request')
     return items
