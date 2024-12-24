@@ -211,7 +211,7 @@ if __name__ == "__main__":
         request_input = yaml.safe_load(f)
 
     converted_path = XpathConstructor(request_input).convert_xpath_to_dataclass()
-    r2_cfg: Path = Path("configurations/r2.xml")
+    r2_cfg: Path = Path("configurations/r1.xml")
     if test_xml_root := XMLRoot(r2_cfg).get_xml_root():
         test_cfg = ConfigHandler(test_xml_root)
 

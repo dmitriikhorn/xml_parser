@@ -134,3 +134,4 @@ configurations/
 # Temporary files
 temp.py
 *.yml
+*.xml
