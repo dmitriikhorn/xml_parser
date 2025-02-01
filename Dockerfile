@@ -1,6 +1,3 @@
-# docker build -t xml-parser-api .
-# docker run -d --mount type=bind,source=/home/dkhorn/projects/yang_based_audit/NETWORK_CONFIGS/Nokia,target=/xml_parser_app/configurations,readonly --name xml_parser_api -p 58000:58000 xml-parser-api
-
 FROM python:3.10
 
 # set the working directory

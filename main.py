@@ -5,11 +5,7 @@ from xml_parser_exceptions import XmlConfigurationLoadError
 import xml_parser_dc as dc
 from lxml.etree import _ElementTree
 
-
-# To start an app:
-# uvicorn main:xml_parser_app --port 58000 --reload
 xml_parser_app = FastAPI()
-
 
 def run_query_to_device(xml_query: list, device_name: str) -> list[list[dc.ResultItem]]:
     """

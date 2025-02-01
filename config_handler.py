@@ -1,13 +1,10 @@
 import copy
-import sys
 from pathlib import Path
-from venv import logger
 
 import lxml.etree as ET
 from lxml.etree import _Element, XMLSyntaxError, _ElementTree
 from xml_parser_helpers import xml_audit_logger
 import xml_parser_dc as dc
-import yaml
 from xml_parser_exceptions import XmlConfigurationLoadError
 
 
@@ -206,21 +203,4 @@ class ConfigHandler:
 
 
 if __name__ == "__main__":
-
-    with open("request_input.yml", "r") as f:
-        request_input = yaml.safe_load(f)
-
-    converted_path = XpathConstructor(request_input).convert_xpath_to_dataclass()
-    r2_cfg: Path = Path("configurations/r1.xml")
-    if test_xml_root := XMLRoot(r2_cfg).get_xml_root():
-        test_cfg = ConfigHandler(test_xml_root)
-
-        tets = test_cfg.prepend_namespace("system[1]/security[1]/aaa[1]/local-profiles[2]/profile[5]/entry[30]/entry-id[110]/")
-
-        #system/security/aaa/local-profiles/profile/entry/entry-id
-        #system/security/aaa/local-profiles/profile/entry/entry-id/
-        #system[1]/security[1]/aaa[1]/local-profiles[2]/profile[5]/entry[30]/entry-id[110]/ ==> 'ns:system[1]/ns:security[1]/ns:aaa[1]/ns:local-profiles[2]/ns:profile[5]/ns:entry[30]/ns:entry-id[110]'
-        #'ns:system/ns:security/ns:aaa/ns:local-profiles/ns:profile/ns:entry/ns:entry-id'
-
-        resp = test_cfg.process_query_pipeline(converted_path)
-        print("debug")
+    pass
