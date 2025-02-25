@@ -31,7 +31,7 @@ class FilterElement(BaseModel):
     @validator("filter_path")
     @classmethod
     def validate_filter_path(cls, value: str) -> str:
-        return value or "text()"
+        return value.strip() or "text()"
 
 
 class PathElement(BaseModel):

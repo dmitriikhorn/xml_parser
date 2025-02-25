@@ -58,7 +58,7 @@ class XpathConstructor:
         parsed_elements: list = []
         for elem in self.input_path:
             path_elem = dc.PathElement(
-                name=elem.get("name"),
+                name=elem.get("name").strip(),
                 filters=self.parse_filters(elem.get("filters"))
             )
             parsed_elements.append(path_elem)
